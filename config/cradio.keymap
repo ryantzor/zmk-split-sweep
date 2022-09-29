@@ -89,7 +89,7 @@
 		&kp TILDE  &kp AT_SIGN  &kp HASH  &kp DOLLAR  &kp PERCENT		&kp CARET &kp AMPERSAND &kp LEFT_PARENTHESIS &kp RIGHT_PARENTHESIS &kp BACKSPACE 
 		&kp TAB    &trans    &trans    &trans   &kp UNDERSCORE 		&kp MINUS &kp EQL  &kp LEFT_BRACE &kp RIGHT_BRACE  &kp ENTER 
 		&kp ESC    &trans 	&trans &trans  &kp TILDE2 	&kp BACKSLASH &kp EQUAL &kp LEFT_BRACKET &kp RIGHT_BRACKET  &kp SLASH 
-					    &to1  &kp LEFT_SHIFT  					&kp LEFT_ALT &to 2 
+					    &to 1  &kp LEFT_SHIFT  					&kp LEFT_ALT &to 2 
 		>;
 		};
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -100,7 +100,7 @@
 // --------------------------------------------------------------------------------------------------------------------------------------------- //		
 		right_layer {
 		bindings = <
-		&kp BANG  &kp ATSN &kp HASH  &kp DLLR  &kp PRCT    			&kp CRRT  &kp AMPS &kp KMLT &kp LPRN &kp RPRN 
+		&kp  &kp ATSN &kp HASH  &kp DLLR  &kp PRCT    			&kp CRRT  &kp AMPS &kp KMLT &kp LPRN &kp RPRN 
 		&kp HASH  &kp QMARK  &kp FSLH  &kp COLN  &kp SCLN 			&kp MINUS &kp KP_EQUAL  &kp LBRC  &kp RBRC   &kp BKSP
 		&kp LSFT  &kp KPLS &kp LBKT &kp RBKT   &kp BSLH    			&kp UNDER &kp LEFT &kp DOWN &kp UP  &kp RIGHT
 					  &mo 3 &kp LCTL  				&to 1  &to 3 
