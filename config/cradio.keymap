@@ -72,7 +72,7 @@
 		bindings = <
 		&kp NUM_1  &kp C_PREV    &kp C_PLAY    &kp C_NEXT    &kp MINUS 			&trans &kp N7   &kp N8  &kp N9  &kp EQUAL
 		&kp F1 &kp F2 &kp C_VOL_DN &kp C_VOL_UP &kp PLUS  						&trans &kp N4  &kp N5 &kp N6 &kp ENTER 
-		&bt BT_CLR  &kp AMPS &kp SLASH &kp STAR &kp DOT   				&N0 &kp N1  &kp N2  &kp N3 &trans   
+		&bt BT_CLR  &kp AMPS &kp SLASH &kp STAR &kp DOT   				&kp N0 &kp N1  &kp N2  &kp N3 &trans   
 					 &to 0 &kp LCTL  					&to 1 &kp LALT 
 		>;
 		};	
