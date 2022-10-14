@@ -42,9 +42,10 @@
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
        		left_layer {
 		bindings = <
-		&kp TILDE  &kp AT_SIGN  &kp HASH  &kp DOLLAR  &kp PERCENT		&kp CARET &kp AMPERSAND &kp LEFT_PARENTHESIS &kp RIGHT_PARENTHESIS &kp BACKSPACE 
-		&kp TAB    &trans    &trans    &trans   &kp UNDERSCORE 		&kp MINUS &kp EQL  &kp LEFT_BRACE &kp RIGHT_BRACE  &kp ENTER 
-		&kp ESC    &trans 	&trans &trans  &kp TILDE2 	&kp BACKSLASH &kp EQUAL &kp LEFT_BRACKET &kp RIGHT_BRACKET  &to 3 
+		&kp TILDE &kp AT  &kp NUM_3  &kp NUM_4 &kp NUM_5		            &kp CARET &kp AMPS &kp LPAR &kp RPAR &kp BKSP 
+		&kp TAB &kp GRAVE &trans &trans &kp UNDER 		                &kp APOS &kp DQT  &kp LBRC &kp RBRC  &kp ENTER 
+		&kp ESC &trans &trans &trans  &trans 	                        &kp NON_US_BSLH &kp EQUAL &kp LBKT &kp RBKT  &to 2
+					            &to 0  &sk LSHIFT  					    &sk RALT &to 3
 		>;
 		};
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
