@@ -45,11 +45,10 @@
 		&kp TILDE  &kp AT_SIGN  &kp HASH  &kp DOLLAR  &kp PERCENT		&kp CARET &kp AMPERSAND &kp LEFT_PARENTHESIS &kp RIGHT_PARENTHESIS &kp BACKSPACE 
 		&kp TAB    &trans    &trans    &trans   &kp UNDERSCORE 		&kp MINUS &kp EQL  &kp LEFT_BRACE &kp RIGHT_BRACE  &kp ENTER 
 		&kp ESC    &trans 	&trans &trans  &kp TILDE2 	&kp BACKSLASH &kp EQUAL &kp LEFT_BRACKET &kp RIGHT_BRACKET  &to 3 
-					    &to 0  &kp LEFT_SHIFT  					&kp LEFT_ALT &to 2 
 		>;
 		};
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
-//     ESC  |  MOUSCRL|  MOUSUP | MOUSCRR |         |                                          |   BACK  | PREVTAB | NXTTAB  |  FRWRD  |    BKSP //
+//     ESC  |  MOUSCRL|  MOUSUP | MOUSCRR |         |                 unused                   |   BACK  | PREVTAB | NXTTAB  |  FRWRD  |    BKSP //
 //     TAB  |  MOUSLF |  MOUSDN | MOUSRT  |    _    |                 LAYER2                   |   LEFT  |    UP   |  RIGHT  |  DOWN   |    ENTER//
 //     ~    |  RT CLK |  MOUSCRU| MOUSCRD |   DEL   |                                          |  RT CLK |         |         |         |    L3   //
 //                              |   L1    |   SHIFT |                                          |  ALT    |    L2                                 //
@@ -58,7 +57,7 @@
 		bindings = <
 		&kp BANG  &kp ATSN &kp HASH  &kp DLLR  &kp PRCT    			&kp CRRT  &kp AMPS &kp KMLT &kp LPRN &kp RPRN 
 		&kp HASH  &kp QMARK  &kp FSLH  &kp COLN  &kp SCLN 			&kp MINUS &kp KP_EQUAL  &kp LBRC  &kp RBRC   &kp BKSP
-		&kp LSFT  &kp KPLS &kp LBKT &kp RBKT   &kp BSLH    			&kp UNDER &kp LEFT &kp DOWN &kp UP  &kp RIGHT
+		&bt BT_CLR  &bt BT_NXT &bt BT_PRV   &kp BSLH    			&kp UNDER &kp LEFT &kp DOWN &kp UP  &kp RIGHT
 					  &to 0 &kp LCTL  				&kp SPACE  &to 3 
 		>;
 		};	
@@ -67,13 +66,13 @@
 //     TAB    |    CAPS |    VOLDN|    VOLUP|    +    |                LAYER3                    |    =    |    6    |    5    |    4    |    ;  //
 //     RESET  |    BRTUP|    BRTDN|    V    |    .    |                                          |    0    |    3    |    2    |    1    |    /  //
 //                                |   L1    |   CMD   |                                          |    ALT  |   L2                                //
-// --------------------------------------------------------------------------------------------------------------------------------------------- //		
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 		tri_layer {
 		bindings = <
-		&kp NUM_1  &kp NUM_2    &kp NUM_3    &kp NUM_4    &kp NUM_5 			&trans &trans   &trans   &trans  &trans
-		&kp F1 &kp F2 &kp F3 &kp F4 &kp F5  						&trans &kp PG_UP  &kp K_VOL_UP &kp K_MUTE &trans 
-		&bt BT_CLR  &bt BT_NXT &bt BT_PRV &kp F6 &kp F7   				&trans &kp PG_DN  &kp K_VOL_DN  &trans &trans   
-					 &to 0 &trans  					&to 1 &trans 
+		&kp NUM_1  &kp C_PREV    &kp C_PLAY    &kp C_NEXT    &kp MINUS 			&trans &kp N1   &kp N8  &kp N9  &kp EQUAL
+		&kp F1 &kp F2 &kp C_VOL_DN &kp C_VOL_UP &kp PLUS  						&trans &kp N4  &kp N5 &kp N6 &kp ENTER 
+		&bt BT_CLR  &kp AMPS &kp SLASH &kp STAR &kp DOT   				&trans &kp N1  &kp N2  &kp N3 &trans   
+					 &to 0 &kp LCTL  					&to 1 &kp LALT 
 		>;
 		};	
         
