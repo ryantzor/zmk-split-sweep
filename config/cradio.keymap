@@ -23,7 +23,7 @@
 //     Q    |    W    |    E    |    R    |    T    |                                          |    Y    |    U    |    I    |    O    |    P    //
 //     A    |    S    |    D    |    F    |    G    |                 LAYER0                   |    H    |    J    |    K    |    L    |    BKSP //
 //     Z    |    X    |    C    |    V    |    B    |                                          |    N    |    M    |    ,    |    .    |    RET  //
-//                              |   CTRL  |   SHIFT |                                          |  SPACE  |    L2                                 //
+//                              |   CTRL  |   SHIFT |                                          |  SPACE  |    L1                                 //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //                
 
 alpha_layer {
@@ -38,8 +38,8 @@ alpha_layer {
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
 //     ~    |    @    |    #    |    $    |    %    |                                          |    ^    |    &    |    (    |    )    |    BKSP //
 //     TAB  |    `    |         |         |    _    |                 LAYER1                   |    '    |    "    |    {    |    }    |    ENTER//
-//     ESC  |         |         |         |         |                                          |    \    |    /    |    [    |    ]    |    L2   //
-//                              |   L1    |   SHIFT |                                          |  ALT    |    L3                                 //
+//     ESC  |         |         |         |         |                                          |    \    |    /    |    [    |    ]    |    L3   //
+//                              |   L1    |   SHIFT |                                          |  ALT    |    L2                                 //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
 symbol_layer {
 		bindings = <
@@ -52,8 +52,8 @@ symbol_layer {
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
 //     ESC  |  MOUSCRL|  MOUSUP | MOUSCRR |         |                 unused                   |   BACK  | PREVTAB | NXTTAB  |  FRWRD  |    BKSP //
 //     TAB  |  MOUSLF |  MOUSDN | MOUSRT  |    _    |                 LAYER2                   |   LEFT  |    UP   |  RIGHT  |  DOWN   |    ENTER//
-//     ~    |  RT CLK |  MOUSCRU| MOUSCRD |   DEL   |                                          |  RT CLK |         |         |         |    L3   //
-//                              |   L1    |   SHIFT |                                          |  ALT    |    L2                                 //
+//     ~    |  RT CLK |  MOUSCRU| MOUSCRD |   DEL   |                                          |  RT CLK |         |         |         |    L4   //
+//                              |   L1    |   SHIFT |                                          |  ALT    |    L3                                 //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //		
 		right_layer {
 		bindings = <
@@ -65,16 +65,26 @@ symbol_layer {
 		};	
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
 //     ESC    |    PLAY |    PREV |    NEXT |    T    |                                          |    -    |    7    |    8    |    9    |    P  //
-//     TAB    |    CAPS |    VOLDN|    VOLUP|    +    |                LAYER3                    |    =    |    6    |    5    |    4    |    ;  //
-//     RESET  |    BRTUP|    BRTDN|    V    |    .    |                                          |    0    |    3    |    2    |    1    |    /  //
-//                                |   L1    |   CMD   |                                          |    ALT  |   L2                                //
+//     TAB    |    CAPS |    VOLDN|    VOLUP|    +    |                LAYER3                    |    =    |    4    |    5    |    6    |    ;  //
+//     RESET  |    BRTUP|    BRTDN|    V    |    .    |                                          |    0    |    1    |    2    |    3    |    L4  //
+//                                |   L1    |   CMD   |                                          |    L4   |   L2                                //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
 		tri_layer {
 		bindings = <
 		&kp NUM_1  &kp C_PREV    &kp C_PLAY    &kp C_NEXT    &kp MINUS 			&trans &kp N7   &kp N8  &kp N9  &kp EQUAL
 		&kp F1 &kp F2 &kp C_VOL_DN &kp C_VOL_UP &kp PLUS  						&trans &kp N4  &kp N5 &kp N6 &kp ENTER 
-		&bt BT_CLR  &kp AMPS &kp SLASH &kp STAR &kp DOT   				&kp N0 &kp N1  &kp N2  &kp N3 &trans   
-					 &to 0 &kp LCTL  					&to 1 &kp LALT 
+		&bt BT_CLR  &kp AMPS &kp SLASH &kp STAR &kp DOT   				&kp N0 &kp N1  &kp N2  &kp N3 &to 4   
+					 &to 0 &kp LCTL  					&to 4 &kp LALT 
+		>;
+		};
+
+
+bt {
+		bindings = <
+		&trans  &trans &trans &trans &trans &trans &trans &trans &trans &trans 
+		&trans  &trans &trans &trans &trans &trans &trans &trans &trans &trans 
+		&bt BT_PRV  &bt BT_NXT &bt BT_CLR &trans &trans   				&trans &trans  &trans  &trans &trans   
+					 &to 0 &trans  					&trans &to 1 
 		>;
 		};	
         
