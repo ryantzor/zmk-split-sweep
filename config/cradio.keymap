@@ -35,7 +35,7 @@ alpha_layer {
 		bindings = <
 		&kp Q &kp W &kp E &kp R &kp T 										&kp Y &kp U  &kp I &kp O &kp P 
 		&kp A &kp S &kp D &kp F &kp G 			        	    &kp H &kp J  &kp K &kp L &kp BKSP
-		&kp Z &kp X &kp C &kp V &kp B				        &kp N &kp M  &kp CMMA &kp DOT &kp RET
+		&lt BT Z &kp X &kp C &kp V &kp B				        &kp N &kp M  &kp CMMA &kp DOT &kp RET
           				&kp LCTL &kp LSHFT  				&kp SPACE &to 1
 		>;
 		};
@@ -60,7 +60,7 @@ symbol_layer {
 //     ~    |  RT CLK |  MOUSCRU| MOUSCRD |   DEL   |                                          |  RT CLK |         |         |         |    L4   //
 //                              |   L1    |   SHIFT |                                          |  ALT    |    L3                                 //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //		
-		right_layer {
+right_layer {
 		bindings = <
 		&kp BANG  &kp ATSN &kp HASH  &kp DLLR  &kp PRCT    			&kp CRRT  &kp AMPS &kp KMLT &kp LPRN &kp RPRN 
 		&kp HASH  &kp QMARK  &kp FSLH  &kp COLN  &kp SCLN 			&kp MINUS &kp KP_EQUAL  &kp LBRC  &kp RBRC   &kp BKSP
@@ -74,7 +74,7 @@ symbol_layer {
 //     RESET  |    BRTUP|    BRTDN|    V    |    .    |                                          |    0    |    1    |    2    |    3    |    L4  //
 //                                |   L1    |   CMD   |                                          |    L4   |   L2                                //
 // --------------------------------------------------------------------------------------------------------------------------------------------- //
-		tri_layer {
+num_layer {
 		bindings = <
 		&kp NUM_1  &kp C_PREV    &kp C_PLAY    &kp C_NEXT    &kp MINUS 			&trans &kp N7   &kp N8  &kp N9  &kp EQUAL
 		&kp F1 &kp F2 &kp C_VOL_DN &kp C_VOL_UP &kp PLUS  						&trans &kp N4  &kp N5 &kp N6 &kp ENTER 
