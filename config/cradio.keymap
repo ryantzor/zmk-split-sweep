@@ -32,9 +32,9 @@
 
         alpha_layer {
             bindings = <
-   &kp Q  &kp W  &kp E      &kp R      &kp T        &kp Y  &kp U     &kp I    &kp O     &kp P
-   &kp A  &kp S  &kp D      &kp F      &kp G        &kp H  &kp J     &kp K    &kp L  &kp BKSP
-&lt BT Z  &kp X  &kp C      &kp V      &kp B        &kp N  &kp M  &kp CMMA  &kp DOT   &kp RET
+   &kp Q  &kp W  &kp E      &kp R      &kp T        &kp Y  &kp U      &kp I    &kp O          &kp P
+   &kp A  &kp S  &kp D      &kp F      &kp G        &kp H  &kp J      &kp K    &kp L  &kp BACKSPACE
+&lt BT Z  &kp X  &kp C      &kp V      &kp B        &kp N  &kp M  &kp COMMA  &kp DOT        &kp RET
                         &kp LCTRL  &kp LSHFT    &kp SPACE  &mo 3
             >;
         };
@@ -85,6 +85,8 @@
 &none    &kp AMPS     &kp SLASH      &kp STAR    &kp DOT    &kp N0  &kp N1  &kp N2  &kp N3    &kp DOT
                                         &to 0   &kp LCTL     &to 4   &none
             >;
+
+            label = "nums";
         };
 
         bt {
