@@ -20,6 +20,30 @@
 };
 
 / {
+    combos {
+        compatible = "zmk,combos";
+
+        esc_combo {
+            bindings = <&kp ESCAPE>;
+            key-positions = <1 2>;
+        };
+
+        tab_combo {
+            bindings = <&kp TAB>;
+            key-positions = <11 12>;
+        };
+
+        backspace_combo {
+            bindings = <&kp BACKSPACE>;
+            key-positions = <7 8>;
+        };
+
+        enter_combo {
+            bindings = <&kp ENTER>;
+            key-positions = <17 18>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
