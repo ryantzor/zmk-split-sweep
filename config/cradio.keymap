@@ -56,10 +56,10 @@
 
         alpha_layer {
             bindings = <
-   &kp Q  &kp W  &kp E         &kp R      &kp T        &kp Y  &kp U      &kp I    &kp O          &kp P
-   &kp A  &kp S  &kp D         &kp F      &kp G        &kp H  &kp J      &kp K    &kp L  &kp BACKSPACE
-&lt BT Z  &kp X  &kp C         &kp V      &kp B        &kp N  &kp M  &kp COMMA  &kp DOT        &kp RET
-                        &kp LEFT_GUI  &kp LSHFT    &kp SPACE  &mo 3
+   &kp Q    &kp W  &kp E         &kp R      &kp T        &kp Y  &kp U      &kp I    &kp O          &kp P
+   &kp A    &kp S  &kp D         &kp F      &kp G        &kp H  &kp J      &kp K    &kp L  &kp BACKSPACE
+&lt BT Z  &lt 2 X  &kp C         &kp V      &kp B        &kp N  &kp M  &kp COMMA  &kp DOT        &kp RET
+                          &kp LEFT_GUI  &kp LSHFT    &kp SPACE  &mo 3
             >;
         };
 
@@ -88,10 +88,10 @@
 
         nav {
             bindings = <
- &kp TILDE      &kp AT    &kp HASH          &kp DLLR   &kp PERCENT        &kp CARET   &kp AMPS  &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &kp RPRN
-  &kp HASH   &kp QMARK    &kp FSLH          &kp COLN      &kp SCLN         &kp LEFT   &kp DOWN          &kp UP_ARROW              &kp RIGHT  &kp BKSP
-&bt BT_CLR  &bt BT_NXT  &bt BT_PRV          &kp BSLH     &kp UNDER    &kp BACKSLASH  &kp SLASH      &kp LEFT_BRACKET      &kp RIGHT_BRACKET     &to 0
-                                    &kp LEFT_CONTROL  &kp LEFT_ALT            &to 3
+     &none  &kp C_PREVIOUS         &kp C_PLAY        &kp C_NEXT         &none       &none     &none         &none      &none       &none
+&kp DELETE      &kp C_MUTE  &kp C_VOLUME_DOWN   &kp C_VOLUME_UP         &none    &kp LEFT  &kp DOWN  &kp UP_ARROW  &kp RIGHT  &kp DELETE
+     &none           &none              &none             &none         &none       &none     &none         &none      &none       &none
+                                               &kp LEFT_CONTROL  &kp LEFT_ALT       &to 3
             >;
         };
 
