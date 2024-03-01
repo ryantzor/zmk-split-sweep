@@ -77,10 +77,10 @@
 
         symbol_layer {
             bindings = <
-&kp TILDE  &kp AT  &kp HASH  &kp DOLLAR  &kp PERCENT    &kp CARET        &kp AMPS   &kp LPAR  &kp RPAR  &kp ASTRK
-&kp GRAVE  &none   &none     &kp MINUS   &kp UNDER      &kp APOS         &kp DQT    &kp LBRC  &kp RBRC  &kp MINUS
-&none      &none   &none     &none       &none          &kp NON_US_BSLH  &kp EQUAL  &kp LBKT  &kp RBKT  &kp PLUS
-                             &to 0       &sk LSHIFT     &sk RALT         &to 2
+&kp TILDE  &kp AT  &kp HASH  &kp DOLLAR  &kp PERCENT    &kp CARET         &kp AMPS   &kp LPAR  &kp RPAR  &kp ASTRK
+&kp GRAVE  &none   &none     &kp MINUS   &kp UNDER      &kp SINGLE_QUOTE  &kp DQT    &kp LBRC  &kp RBRC  &kp MINUS
+&none      &none   &none     &none       &none          &kp NON_US_BSLH   &kp EQUAL  &kp LBKT  &kp RBKT  &kp PLUS
+                             &to 0       &sk LSHIFT     &sk RALT          &to 2
             >;
         };
 
@@ -93,10 +93,10 @@
 
         nav {
             bindings = <
-&none       &kp C_PREVIOUS  &kp C_PLAY         &kp C_NEXT        &none           &none     &none     &none         &none      &none
-&kp DELETE  &kp C_MUTE      &kp C_VOLUME_DOWN  &kp C_VOLUME_UP   &none           &kp LEFT  &kp DOWN  &kp UP_ARROW  &kp RIGHT  &kp DELETE
-&none       &none           &kp LEFT_SHIFT     &kp LEFT_CONTROL  &kp LEFT_ALT    &none     &none     &none         &none      &none
-                                               &kp LEFT_GUI      &to 0           &none
+&none       &kp C_PREVIOUS  &kp C_PLAY      &kp C_NEXT        &none           &none     &none     &none         &none      &none
+&kp C_MUTE  &kp C_VOL_DN    &kp C_VOL_UP    &trans            &kp DEL         &kp LEFT  &kp DOWN  &kp UP_ARROW  &kp RIGHT  &kp DELETE
+&none       &none           &kp LEFT_SHIFT  &kp LEFT_CONTROL  &kp LEFT_ALT    &none     &none     &none         &none      &none
+                                            &kp LEFT_GUI      &to 0           &none
             >;
         };
 
