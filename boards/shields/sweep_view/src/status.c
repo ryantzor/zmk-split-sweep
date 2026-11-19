@@ -2,7 +2,7 @@
  * The Sweep's nice!view screen, read standing on end (68 wide, 160 tall):
  *
  *   ┌────────┐
- *   │  art   │  68×68 element animation for the active layer
+ *   │  art   │  68×68 emblem for the active layer, drawing itself
  *   ├────────┤
  *   │  NAV   │  layer name
  *   │ ▭ 84%  │  battery
@@ -177,39 +177,54 @@ static void draw_profiles(void) {
     rotate(c);
 }
 
-/* Animation */
+/* Animation
+ *
+ * Art draws itself: frame 0 is the first stroke and the last frame is the
+ * finished picture, which is where it rests. After a layer change it draws
+ * once and stays; in "active" mode it redraws every few seconds while you
+ * type and rests finished when the keyboard goes idle. */
+
+#define HOLD_TICKS (SWEEP_VIEW_FPS * 3)
 
 static lv_timer_t *anim_timer;
 static const struct sweep_view_anim *anim;
 static uint8_t anim_frame;
-static int anim_ticks_left;
+static int anim_hold;
 static bool keyboard_active = true;
 
 static void show_frame(uint8_t frame) {
-    anim_frame = frame % anim->count;
+    anim_frame = frame < anim->count ? frame : anim->count - 1;
     lv_image_set_src(art_image, anim->frames[anim_frame]);
 }
+
+static void show_finished(void) { show_frame(anim->count - 1); }
 
 static void anim_tick(lv_timer_t *timer) {
     if (!anim) {
         return;
     }
-    show_frame(anim_frame + 1);
-    if (SWEEP_VIEW_MODE == SWEEP_VIEW_MODE_LAYER_CHANGE && --anim_ticks_left <= 0) {
+    if (anim_frame + 1 < anim->count) {
+        show_frame(anim_frame + 1);
+        return;
+    }
+    if (SWEEP_VIEW_MODE != SWEEP_VIEW_MODE_ACTIVE) {
         lv_timer_pause(timer);
+    } else if (++anim_hold >= HOLD_TICKS) {
+        anim_hold = 0;
+        show_frame(0);
     }
 }
 
 static void start_anim(void) {
-    if (SWEEP_VIEW_MODE == SWEEP_VIEW_MODE_OFF || anim->count < 2) {
+    anim_hold = 0;
+    if (SWEEP_VIEW_MODE == SWEEP_VIEW_MODE_OFF || anim->count < 2 ||
+        (SWEEP_VIEW_MODE == SWEEP_VIEW_MODE_ACTIVE && !keyboard_active)) {
         lv_timer_pause(anim_timer);
-    } else if (SWEEP_VIEW_MODE == SWEEP_VIEW_MODE_LAYER_CHANGE) {
-        /* Twice through, ending back on the first frame. */
-        anim_ticks_left = anim->count * 2;
-        lv_timer_resume(anim_timer);
-    } else if (keyboard_active) {
-        lv_timer_resume(anim_timer);
+        show_finished();
+        return;
     }
+    show_frame(0);
+    lv_timer_resume(anim_timer);
 }
 
 static void set_layer_art(uint8_t layer) {
@@ -219,7 +234,6 @@ static void set_layer_art(uint8_t layer) {
         return;
     }
     anim = next;
-    show_frame(0);
     start_anim();
 }
 
@@ -319,22 +333,23 @@ static struct layer_state layer_get(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(sweep_view_layer, struct layer_state, layer_update, layer_get)
 ZMK_SUBSCRIPTION(sweep_view_layer, zmk_layer_state_changed);
 
-/* While typing the art moves; once the keyboard goes idle it rests on its
- * first frame, so the animation costs nothing while you're away. */
+/* In "active" mode the art keeps redrawing while you type; once the
+ * keyboard goes idle it rests finished, so it costs nothing while you're away. */
 struct activity_state {
     enum zmk_activity_state state;
 };
 
 static void activity_update(struct activity_state s) {
+    const bool was_active = keyboard_active;
     keyboard_active = s.state == ZMK_ACTIVITY_ACTIVE;
-    if (SWEEP_VIEW_MODE != SWEEP_VIEW_MODE_ACTIVE || !anim) {
+    if (SWEEP_VIEW_MODE != SWEEP_VIEW_MODE_ACTIVE || !anim || was_active == keyboard_active) {
         return;
     }
     if (keyboard_active) {
         start_anim();
     } else {
         lv_timer_pause(anim_timer);
-        show_frame(0);
+        show_finished();
     }
 }
 
