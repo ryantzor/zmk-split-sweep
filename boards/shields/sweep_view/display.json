@@ -1,0 +1,28 @@
+{
+  "animate": "active",
+  "fps": 8,
+  "invert": false,
+  "flip": false,
+  "layers": [
+    {
+      "name": "BASE",
+      "art": "air"
+    },
+    {
+      "name": "SYM",
+      "art": "fire"
+    },
+    {
+      "name": "NAV",
+      "art": "water"
+    },
+    {
+      "name": "NUM",
+      "art": "earth"
+    },
+    {
+      "name": "BT",
+      "art": "avatar"
+    }
+  ]
+}

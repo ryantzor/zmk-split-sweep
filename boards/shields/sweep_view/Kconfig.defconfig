@@ -1,0 +1,45 @@
+# A nice!view wired straight to a Sweep's nice!nano, showing the layer,
+# battery, and connection beside an Avatar element animation.
+
+if SHIELD_SWEEP_VIEW
+
+config ZMK_DISPLAY
+    default y
+
+config LS0XX_VCOM_THREAD_PRIO
+    default 11
+
+config LV_Z_VDB_SIZE
+    default 100
+
+config LV_DPI_DEF
+    default 161
+
+config LV_Z_BITS_PER_PIXEL
+    default 1
+
+choice LV_COLOR_DEPTH
+    default LV_COLOR_DEPTH_1
+endchoice
+
+choice ZMK_DISPLAY_WORK_QUEUE
+    default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
+endchoice
+
+choice ZMK_DISPLAY_STATUS_SCREEN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+endchoice
+
+config LV_Z_MEM_POOL_SIZE
+    default 8192
+
+config SWEEP_VIEW_STATUS
+    bool "Sweep nice!view status screen"
+    default y
+    depends on ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    select LV_FONT_MONTSERRAT_16
+    select LV_FONT_MONTSERRAT_12
+    select LV_USE_IMAGE
+    select LV_USE_CANVAS
+
+endif # SHIELD_SWEEP_VIEW

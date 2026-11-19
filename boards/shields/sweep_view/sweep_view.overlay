@@ -1,0 +1,60 @@
+/*
+ * The Sweep wires a key to every header pin but D0, so the nice!view goes
+ * on D0 and the three pads under the nice!nano v2:
+ *
+ *   nice!view   nice!nano v2
+ *   GND         GND
+ *   VCC         VCC (3.3V)
+ *   SCL (SCK)   D0   / P0.08
+ *   SDA (MOSI)  P1.07 (underside)
+ *   CS          P1.02 (underside)
+ *
+ * The underside pads are low-frequency pins, so the clock stays on D0 and
+ * the bus runs at half the nice!view's usual speed.
+ */
+
+&pinctrl {
+    spi2_view_default: spi2_view_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                <NRF_PSEL(SPIM_MOSI, 1, 7)>;
+        };
+    };
+    spi2_view_sleep: spi2_view_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                <NRF_PSEL(SPIM_MOSI, 1, 7)>;
+            low-power-enable;
+        };
+    };
+};
+
+/* D0 doubles as the UART's receive pin; keep the UART off it. */
+&uart0 {
+    status = "disabled";
+};
+
+&spi2 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    pinctrl-0 = <&spi2_view_default>;
+    pinctrl-1 = <&spi2_view_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+
+    sweep_view: ls0xx@0 {
+        compatible = "sharp,ls0xx";
+        spi-max-frequency = <500000>;
+        reg = <0>;
+        width = <160>;
+        height = <68>;
+        serial-vcom-inversion;
+        serial-vcom-interval = <33>;
+    };
+};
+
+/ {
+    chosen {
+        zephyr,display = &sweep_view;
+    };
+};
