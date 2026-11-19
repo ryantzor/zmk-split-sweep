@@ -16,7 +16,7 @@ left firmware; flash that one once the display is wired.
 
 The screen shows an animation for the active layer, the layer name, battery,
 and connection. `display.json` picks the animation and name per layer and how
-it animates (`active`: while typing, `layer-change`: twice after switching,
+it animates (`layer-change`: twice after switching layers, then rests; `active`: while typing;
 `off`). Animations are folders of 68×68 PBM frames in `art/`;
-`tools/make_elements.py` draws the Avatar elements, and the build turns the
+`tools/make_elements.py` draws the nation emblems (air, water, earth, fire) and a plain Bluetooth symbol, and the build turns the
 frames into C with `tools/build_art.py`.

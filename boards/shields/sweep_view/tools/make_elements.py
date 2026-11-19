@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Draws the Avatar element animations for the nice!view as 68x68 1-bit PBM
-frames: air, water, fire, earth, and the Avatar state. Every animation loops
-seamlessly. Run it again after changing a drawing; it writes ../art/<name>/.
+"""Draws the nation emblems for the nice!view as 68x68 1-bit PBM frames:
+air, water, earth, and fire, plus a still Bluetooth symbol. Each animation
+starts and ends on the plain emblem, so the screen rests on a clean
+picture when it stops. Run it again after changing a drawing; it writes
+../art/<name>/.
 
     python3 make_elements.py [--sheet preview.png]
 """
@@ -14,217 +16,297 @@ import zlib
 
 SIZE = 68
 FRAMES = 12
+SCALE = 4  # drawn this much larger, then shrunk, for smooth curves
 HERE = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.join(HERE, "..", "art")
 
 
 class Canvas:
+    """Coordinates and widths are in screen pixels (0..68)."""
+
     def __init__(self):
-        self.px = [[0] * SIZE for _ in range(SIZE)]
+        n = SIZE * SCALE
+        self.n = n
+        self.px = [bytearray(n) for _ in range(n)]
+        self.clip = None  # (cx, cy, r): only draw inside this circle
 
-    def set(self, x, y, v=1):
-        x, y = int(round(x)), int(round(y))
-        if 0 <= x < SIZE and 0 <= y < SIZE:
-            self.px[y][x] = v
+    def _dot(self, x, y, r, v):
+        s = SCALE
+        cx, cy, rr = x * s, y * s, max(0.5, r * s)
+        for yy in range(max(0, int(cy - rr)), min(self.n, int(cy + rr) + 1)):
+            dy = yy + 0.5 - cy
+            span = rr * rr - dy * dy
+            if span < 0:
+                continue
+            half = math.sqrt(span)
+            row = self.px[yy]
+            for xx in range(max(0, int(cx - half)), min(self.n, int(cx + half) + 1)):
+                if self.clip:
+                    ccx, ccy, cr = self.clip
+                    if ((xx + 0.5) / s - ccx) ** 2 + ((yy + 0.5) / s - ccy) ** 2 > cr * cr:
+                        continue
+                row[xx] = v
 
-    def disc(self, cx, cy, r, v=1):
-        for y in range(int(cy - r - 1), int(cy + r + 2)):
-            for x in range(int(cx - r - 1), int(cx + r + 2)):
-                if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
-                    self.set(x, y, v)
-
-    def ring(self, cx, cy, r, w=1.0, v=1):
-        for y in range(int(cy - r - w - 1), int(cy + r + w + 2)):
-            for x in range(int(cx - r - w - 1), int(cx + r + w + 2)):
-                d = math.hypot(x - cx, y - cy)
-                if abs(d - r) <= w / 2:
-                    self.set(x, y, v)
-
-    def line(self, x0, y0, x1, y1, w=1.0, v=1):
-        steps = int(max(abs(x1 - x0), abs(y1 - y0)) * 2) + 1
-        for i in range(steps + 1):
-            t = i / steps
-            x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
-            if w <= 1:
-                self.set(x, y, v)
-            else:
-                self.disc(x, y, w / 2, v)
-
-    def polyline(self, pts, w=1.0, v=1):
+    def stroke(self, pts, w0, w1=None, v=1):
+        """A polyline whose width runs from w0 to w1 along its length."""
+        w1 = w0 if w1 is None else w1
+        lengths = [0.0]
         for a, b in zip(pts, pts[1:]):
-            self.line(a[0], a[1], b[0], b[1], w, v)
+            lengths.append(lengths[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+        total = lengths[-1] or 1
+        for i, (a, b) in enumerate(zip(pts, pts[1:])):
+            seg = math.hypot(b[0] - a[0], b[1] - a[1])
+            steps = max(1, int(seg * SCALE))
+            for k in range(steps + 1):
+                t = k / steps
+                u = (lengths[i] + seg * t) / total
+                self._dot(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, (w0 + (w1 - w0) * u) / 2, v)
 
-    def polygon(self, pts, v=1):
-        ys = [p[1] for p in pts]
-        for y in range(max(0, int(min(ys))), min(SIZE, int(max(ys)) + 1)):
+    def fill(self, pts, mask):
+        """Fills a polygon into a separate mask (a list of bytearrays)."""
+        sp = [(x * SCALE, y * SCALE) for x, y in pts]
+        ys = [p[1] for p in sp]
+        for yy in range(max(0, int(min(ys))), min(self.n, int(max(ys)) + 1)):
+            yc = yy + 0.5
             xs = []
-            for (x0, y0), (x1, y1) in zip(pts, pts[1:] + pts[:1]):
-                if (y0 <= y < y1) or (y1 <= y < y0):
-                    xs.append(x0 + (y - y0) * (x1 - x0) / (y1 - y0))
+            for (x0, y0), (x1, y1) in zip(sp, sp[1:] + sp[:1]):
+                if (y0 <= yc < y1) or (y1 <= yc < y0):
+                    xs.append(x0 + (yc - y0) * (x1 - x0) / (y1 - y0))
             xs.sort()
+            row = mask[yy]
             for a, b in zip(xs[::2], xs[1::2]):
-                for x in range(int(math.ceil(a)), int(math.floor(b)) + 1):
-                    self.set(x, y, v)
+                for xx in range(max(0, int(a)), min(self.n, int(b) + 1)):
+                    row[xx] = 1
 
-    def rect(self, x, y, w, h, v=1):
-        for yy in range(int(y), int(y + h)):
-            for xx in range(int(x), int(x + w)):
-                self.set(xx, yy, v)
+    def mask(self):
+        return [bytearray(self.n) for _ in range(self.n)]
+
+    def outline(self, mask, w):
+        """Inks the edge of a filled mask, w pixels thick, inside the shape."""
+        k = max(1, int(round(w * SCALE)))
+        n = self.n
+
+        def erode_rows(src):
+            out = []
+            for row in src:
+                r = bytearray(n)
+                run = 0
+                # A pixel survives when the whole window around it is set.
+                pref = [0] * (n + 1)
+                for i in range(n):
+                    pref[i + 1] = pref[i] + row[i]
+                for i in range(n):
+                    a, b = max(0, i - k), min(n, i + k + 1)
+                    r[i] = 1 if pref[b] - pref[a] == b - a else 0
+                out.append(r)
+            return out
+
+        def transpose(m):
+            return [bytearray(col) for col in zip(*m)]
+
+        eroded = transpose(erode_rows(transpose(erode_rows(mask))))
+        for y in range(n):
+            row, src, er = self.px[y], mask[y], eroded[y]
+            for x in range(n):
+                if src[x] and not er[x]:
+                    row[x] = 1
+
+    def ring(self, cx, cy, r, w):
+        pts = [(cx + r * math.cos(a / 90 * math.pi), cy + r * math.sin(a / 90 * math.pi)) for a in range(181)]
+        self.stroke(pts, w)
+
+    def frame(self):
+        """Shrinks to 68x68: a pixel is ink when at least 40% of it is."""
+        out = [[0] * SIZE for _ in range(SIZE)]
+        s = SCALE
+        for y in range(SIZE):
+            rows = self.px[y * s : y * s + s]
+            for x in range(SIZE):
+                ink = sum(sum(r[x * s : x * s + s]) for r in rows)
+                out[y][x] = 1 if ink >= 0.4 * s * s else 0
+        return out
+
+
+def spiral(cx, cy, radius, turns, start, clockwise=True, steps=90):
+    """An Archimedean spiral from its center out to radius, ending at angle
+    start (radians). Screen y points down, so clockwise means increasing angle."""
+    pts = []
+    total = turns * 2 * math.pi
+    sign = 1 if clockwise else -1
+    for i in range(steps + 1):
+        t = i / steps
+        theta = start - sign * total * (1 - t)
+        r = radius * t
+        pts.append((cx + r * math.cos(theta), cy + r * math.sin(theta)))
+    return pts
 
 
 def phase(f):
     return 2 * math.pi * f / FRAMES
 
 
+def ease(f):
+    """0 at the first frame, rising and falling once per loop."""
+    return math.sin(math.pi * f / FRAMES) ** 2
+
+
 def air(f):
-    """A three-armed swirl spinning a third of a turn per loop."""
+    """Three swirls in a ring, each sweeping into a long tail, turning a
+    third of a circle per loop (so the loop ends where it began)."""
     c = Canvas()
-    spin = phase(f) / 3
-    for arm in range(3):
-        base = spin + arm * 2 * math.pi / 3
-        pts = []
-        for i in range(60):
-            t = i / 59
-            theta = base + t * 2.6 * math.pi
-            r = 2 + t * 24
-            pts.append((34 + r * math.cos(theta), 34 + r * math.sin(theta)))
-        for i, (a, b) in enumerate(zip(pts, pts[1:])):
-            w = 1.2 + 2.6 * (i / len(pts))
-            c.line(a[0], a[1], b[0], b[1], w)
-    c.disc(34, 34, 3)
-    # Gusts circling the swirl.
+    spin = 2 * math.pi / 3 * f / FRAMES
     for k in range(3):
-        a0 = -spin * 2 + k * 2 * math.pi / 3
-        pts = [(34 + 31 * math.cos(a0 + s * 0.05), 34 + 31 * math.sin(a0 + s * 0.05)) for s in range(12)]
-        c.polyline(pts, 1)
-    return c
+        a = spin + k * 2 * math.pi / 3 - math.pi / 2 - math.pi / 3
+        sx, sy = 34 + 12.5 * math.cos(a), 34 + 12.5 * math.sin(a)
+        # The swirl ends pointing away from the middle, then the tail
+        # carries on around the outside.
+        body = spiral(sx, sy, 10, 1.65, a, clockwise=True)
+        tail = []
+        for i in range(1, 30):
+            t = i / 29
+            ang = a + t * 1.55
+            r = 22 + 3.5 * t
+            tail.append((34 + r * math.cos(ang), 34 + r * math.sin(ang)))
+        c.stroke(body, 1.6, 3.2)
+        c.stroke([body[-1]] + tail, 3.2, 0.9)
+    return c.frame()
+
+
+def bezier(p0, p1, p2, steps=24):
+    return [((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+             (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1])
+            for t in (i / steps for i in range(steps + 1))]
+
+
+def cubic(p0, p1, p2, p3, steps=30):
+    out = []
+    for i in range(steps + 1):
+        t = i / steps
+        a, b, c_, d = (1 - t) ** 3, 3 * (1 - t) ** 2 * t, 3 * (1 - t) * t * t, t ** 3
+        out.append((a * p0[0] + b * p1[0] + c_ * p2[0] + d * p3[0], a * p0[1] + b * p1[1] + c_ * p2[1] + d * p3[1]))
+    return out
 
 
 def water(f):
-    """Rolling waves under a crescent moon."""
+    """The water emblem: a circle holding three curls whose tails stream
+    off to the right as nested wave lines, over rolling waves. The waves
+    roll one wavelength per loop and the curls bob."""
     c = Canvas()
     t = phase(f)
-    # Moon: a disc with a bite out of it.
-    c.disc(50, 13, 8)
-    c.disc(54, 11, 7, 0)
-    for layer, (y0, amp, k, speed, w) in enumerate(
-        [(30, 3.0, 2, 1, 1.4), (40, 4.0, 1, -1, 2.0), (51, 5.0, 2, 1, 2.6)]
-    ):
-        pts = []
-        for x in range(-2, SIZE + 3):
-            y = y0 + amp * math.sin(2 * math.pi * k * x / SIZE + speed * t + layer)
-            pts.append((x, y))
-        c.polyline(pts, w)
-        if layer == 2:
-            # Fill under the front wave with a falling stripe pattern.
-            for x, y in pts:
-                for yy in range(int(y) + 3, SIZE):
-                    if (yy + int(x) // 3 + f) % 4 == 0:
-                        c.set(x, yy)
-    # Spray drops riding the front crest.
-    for d in range(3):
-        x = (d * 23 + f * 68 / FRAMES) % SIZE
-        y = 51 + 5 * math.sin(2 * math.pi * 2 * x / SIZE + t + 2) - 6 - 2 * math.sin(t * 2 + d)
-        c.disc(x, y, 1.2)
-    return c
-
-
-def fire(f):
-    """A flickering flame: solid outside, hollow middle, solid core, with embers."""
-    c = Canvas()
-    t = phase(f)
-
-    def flame(scale, bottom, height, offset):
-        left, right = [], []
-        for i in range(height + 1):
-            y = bottom - i
-            u = i / height
-            # Teardrop: wide near the base, a point at the top.
-            half = scale * math.sin(math.pi * min(1.0, u * 1.15)) ** 0.8 * (1 - u) ** 0.35
-            sway = (u ** 1.5) * (4 * math.sin(t + u * 3 + offset) + 2 * math.sin(2 * t + u * 5))
-            half *= 1 + 0.12 * math.sin(3 * t + u * 7 + offset)
-            left.append((34 + sway - half, y))
-            right.append((34 + sway + half, y))
-        return left + right[::-1]
-
-    c.polygon(flame(21, 64, 56, 0))
-    c.polygon(flame(14, 63, 40, 1), 0)
-    c.polygon(flame(7, 62, 24, 2))
-    for e in range(5):
-        u = ((f / FRAMES) + e / 5) % 1
-        x = 34 + 18 * math.sin(e * 2.3 + u * 4) * (0.5 + u)
-        y = 50 - u * 50
-        if u > 0.25:
-            c.disc(x, y, 1.0 if u > 0.7 else 1.5)
-    return c
+    moving = 1 if f else 0
+    c.ring(34, 34, 30.5, 2.6)
+    c.clip = (34, 34, 28.4)
+    for row, (y0, amp) in enumerate([(44, 2.6), (52, 2.6)]):
+        pts = [(x / 2, y0 + amp * math.sin(2 * math.pi * (x / 2) / 40 + t + row * 1.3)) for x in range(0, 137)]
+        c.stroke(pts, 2.3)
+    for k, (sx, sy, r) in enumerate([(16, 25, 5.8), (29, 19, 5.8), (42, 14, 5.4)]):
+        bob = 1.3 * math.sin(t + k * 2.1) * moving
+        body = spiral(sx, sy + bob, r, 1.45, math.pi / 2, clockwise=False)
+        c.stroke(body, 1.2, 2.3)
+        e = body[-1]
+        # Leaving the curl heading right, dropping a little, then running
+        # level to the rim, with the far end swaying.
+        tail = []
+        for i in range(0, 61):
+            d = i * 0.75
+            sway = moving * 0.8 * (d / 45) * math.sin(t + d / 7 + k)
+            tail.append((e[0] + d, e[1] + 3.2 * (1 - math.exp(-d / 5)) + sway))
+        c.stroke(tail, 2.3)
+    c.clip = None
+    return c.frame()
 
 
 def earth(f):
-    """Rock pillars earthbending up out of the ground in turn."""
+    """The earth emblem: a rounded trapezoid on two feet with a swirl
+    inside. It stomps down once per loop, kicking up dust, while the
+    swirl turns."""
+    c = Canvas()
+    stomp = ease(f)
+    lift = -5 * math.sin(math.pi * min(1, f / (FRAMES * 0.5))) if f < FRAMES * 0.5 else 0
+    dy = lift
+    outline = [
+        (25, 8), (43, 8), (46, 10),          # top, rounding the right corner
+        (61, 51), (61, 58), (39, 58),        # right side and right foot
+        (39, 52), (29, 52), (29, 58),        # the notch between the feet
+        (7, 58), (7, 51), (22, 10), (25, 8),  # left foot and left side
+    ]
+    c.stroke([(x, y + dy) for x, y in outline], 2.6)
+    # The bars across each foot.
+    for y in (45, 50):
+        c.stroke([(13, y + dy), (26, y + dy)], 2.2)
+        c.stroke([(42, y + dy), (55, y + dy)], 2.2)
+    swirl_turn = 2 * math.pi * f / FRAMES
+    body = spiral(34, 27 + dy, 9.5, 1.7, -math.pi / 2 + swirl_turn, clockwise=True)
+    c.stroke(body, 1.3, 2.6)
+    # Dust where it lands, in the frames just after the stomp.
+    if FRAMES * 0.5 <= f < FRAMES * 0.85:
+        k = (f - FRAMES * 0.5) / (FRAMES * 0.35)
+        for side in (-1, 1):
+            for j in range(3):
+                x = 34 + side * (30 + 5 * k + j * 2.5)
+                y = 60 - 4 * k - j * 2
+                c._dot(x, y, 0.9, 1)
+    return c.frame()
+
+
+def fire(f):
+    """The fire emblem: curling tongues of flame rising from a bowl around a
+    swirl, drawn as one outline. They flicker and settle back each loop."""
     c = Canvas()
     t = phase(f)
-    ground = 60
-    c.rect(0, ground, SIZE, 2)
-    for x in range(0, SIZE, 3):
-        c.set(x, ground + 4)
-        c.set(x + 1, ground + 6)
-    pillars = [(6, 16, 0.0), (26, 16, 2.1), (46, 16, 4.2)]
-    for x, w, p in pillars:
-        rise = max(0.0, math.sin(t + p))
-        h = int(4 + 40 * rise)
-        top = ground - h
-        # Outline with a chipped top and cracks.
-        c.rect(x, top, w, h)
-        c.rect(x + 2, top + 2, w - 4, h - 2, 0)
-        c.set(x, top, 0)
-        c.set(x + w - 1, top, 0)
-        c.line(x + 3, top + 2, x + 6, top + 7)
-        c.line(x + w - 4, top + h * 0.5, x + w - 7, top + h * 0.5 + 6)
-        for yy in range(top + 4, ground, 4):
-            c.set(x + 5 + (yy // 4) % 5, yy)
-        # Pebbles kicked up while it's rising.
-        if 0.1 < rise < 0.95 and math.cos(t + p) > 0:
-            k = 1 - rise
-            c.disc(x - 2 - 4 * k, top - 3 - 6 * k, 1.2)
-            c.disc(x + w + 1 + 4 * k, top - 1 - 8 * k, 1.0)
-    return c
+    calm = 1 if f else 0
+    m = c.mask()
+
+    def tongue(base, c1, c2, tip, width, ph):
+        sway = calm * math.sin(t + ph)
+        tip = (tip[0] + 2.4 * sway, tip[1] + calm * 1.8 * math.sin(2 * t + ph))
+        c2 = (c2[0] + 1.6 * sway, c2[1])
+        line = cubic(base, c1, c2, tip, 48)
+        left, right = [], []
+        for i, (x, y) in enumerate(line):
+            u = i / (len(line) - 1)
+            a, b = line[max(i - 1, 0)], line[min(i + 1, len(line) - 1)]
+            nx, ny = b[0] - a[0], b[1] - a[1]
+            n = math.hypot(nx, ny) or 1
+            half = width * (1 - u) ** 0.75 * (0.7 + 0.3 * math.sin(math.pi * u))
+            left.append((x - ny / n * half, y + nx / n * half))
+            right.append((x + ny / n * half, y - nx / n * half))
+        c.fill(left + right[::-1], m)
+
+    # Each tongue leans out, then its tip curls back the other way.
+    tongue((34, 44), (28, 30), (42, 16), (35, 2), 8.0, 0.0)
+    tongue((25, 47), (19, 34), (20, 22), (10, 11), 6.0, 1.4)
+    tongue((43, 47), (49, 34), (48, 22), (58, 11), 6.0, 2.6)
+    tongue((16, 53), (10, 47), (11, 38), (3, 30), 4.5, 3.7)
+    tongue((52, 53), (58, 47), (57, 38), (65, 30), 4.5, 4.8)
+    bowl = [(34 + 26 * math.cos(a / 40 * math.pi), 47 + 15 * math.sin(a / 40 * math.pi)) for a in range(0, 41)]
+    c.fill(bowl, m)
+    # Fills between the tongues' roots, so the outline only traces the
+    # outside of the fire.
+    c.fill([(14, 54), (22, 44), (30, 38), (38, 38), (46, 44), (54, 54)], m)
+    c.outline(m, 1.9)
+    body = spiral(34, 50, 8.5, 1.55, -math.pi / 2 + calm * 0.6 * math.sin(t), clockwise=True)
+    c.stroke(body, 1.2, 2.3)
+    return c.frame()
 
 
-def avatar(f):
-    """Aang's arrow, with the four elements circling it."""
+def bluetooth(_f):
+    """A plain Bluetooth rune, standing still."""
     c = Canvas()
-    t = phase(f)
-    # The arrow: a shaft and a head pointing down.
-    c.rect(31, 14, 6, 26)
-    c.polygon([(21, 36), (47, 36), (34, 54)])
-    c.ring(34, 34, 31, 1.2)
-    glyph_r = 26
-    for k in range(4):
-        a = t + k * math.pi / 2 - math.pi / 2
-        gx, gy = 34 + glyph_r * math.cos(a), 34 + glyph_r * math.sin(a)
-        c.disc(gx, gy, 6, 0)
-        if k == 0:  # air: a curl
-            c.polyline([(gx + 3 * math.cos(s / 3) * (1 - s / 24), gy + 3 * math.sin(s / 3) * (1 - s / 24)) for s in range(20)], 1.2)
-        elif k == 1:  # water: two waves
-            for dy in (-1.5, 1.5):
-                c.polyline([(gx - 4 + i, gy + dy + math.sin(i * 1.4)) for i in range(9)], 1)
-        elif k == 2:  # fire: a small flame
-            c.polygon([(gx, gy - 5), (gx + 3.5, gy + 3), (gx - 3.5, gy + 3)])
-        else:  # earth: a square stone
-            c.rect(gx - 3, gy - 3, 7, 7)
-            c.rect(gx - 1, gy - 1, 3, 3, 0)
-    return c
+    c.stroke([(22, 22), (44, 44), (33, 55), (33, 13), (44, 24), (22, 46)], 3.4)
+    return c.frame()
 
 
-ANIMATIONS = {"air": air, "water": water, "fire": fire, "earth": earth, "avatar": avatar}
+ANIMATIONS = {"air": (air, FRAMES), "water": (water, FRAMES), "earth": (earth, FRAMES),
+              "fire": (fire, FRAMES), "bluetooth": (bluetooth, 1)}
 
 
-def write_pbm(path, canvas):
+def write_pbm(path, px):
     rows = bytearray()
     for y in range(SIZE):
         byte, bits = 0, 0
         for x in range(SIZE):
-            byte = (byte << 1) | canvas.px[y][x]
+            byte = (byte << 1) | px[y][x]
             bits += 1
             if bits == 8:
                 rows.append(byte)
@@ -240,15 +322,16 @@ def write_sheet(path, sheet):
     """A PNG of every frame, for looking at the drawings."""
     scale, gap = 3, 4
     names = list(sheet)
-    w = FRAMES * (SIZE * scale + gap) + gap
+    cols = max(len(frames) for frames in sheet.values())
+    w = cols * (SIZE * scale + gap) + gap
     h = len(names) * (SIZE * scale + gap) + gap
     img = [[200] * w for _ in range(h)]
     for r, name in enumerate(names):
-        for f, canvas in enumerate(sheet[name]):
+        for f, px in enumerate(sheet[name]):
             ox, oy = gap + f * (SIZE * scale + gap), gap + r * (SIZE * scale + gap)
             for y in range(SIZE):
                 for x in range(SIZE):
-                    v = 30 if canvas.px[y][x] else 235
+                    v = 30 if px[y][x] else 235
                     for dy in range(scale):
                         row = img[oy + y * scale + dy]
                         for dx in range(scale):
@@ -265,18 +348,21 @@ def write_sheet(path, sheet):
 
 
 def main():
+    only = [a for a in sys.argv[1:] if a in ANIMATIONS]
     sheet = {}
-    for name, draw in ANIMATIONS.items():
+    for name, (draw, count) in ANIMATIONS.items():
+        if only and name not in only:
+            continue
         folder = os.path.join(ART, name)
         os.makedirs(folder, exist_ok=True)
         for old in os.listdir(folder):
             if old.endswith(".pbm"):
                 os.remove(os.path.join(folder, old))
         sheet[name] = []
-        for f in range(FRAMES):
-            canvas = draw(f)
-            write_pbm(os.path.join(folder, "%02d.pbm" % f), canvas)
-            sheet[name].append(canvas)
+        for f in range(count):
+            px = draw(f)
+            write_pbm(os.path.join(folder, "%02d.pbm" % f), px)
+            sheet[name].append(px)
     if "--sheet" in sys.argv:
         write_sheet(sys.argv[sys.argv.index("--sheet") + 1], sheet)
 
