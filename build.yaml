@@ -17,3 +17,7 @@ include:
     shield: cradio_left
   - board: nice_nano//zmk
     shield: cradio_right
+  # The left half with the nice!view wired in (see boards/shields/sweep_view).
+  - board: nice_nano//zmk
+    shield: cradio_left sweep_view
+    artifact-name: cradio_left_view-nice_nano-zmk

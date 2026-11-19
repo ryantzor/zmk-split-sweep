@@ -1,0 +1,28 @@
+{
+    "animate": "layer-change",
+    "flip": false,
+    "fps": 8,
+    "invert": true,
+    "layers": [
+        {
+            "art": "air",
+            "name": "BASE"
+        },
+        {
+            "art": "fire",
+            "name": "SYM"
+        },
+        {
+            "art": "water",
+            "name": "NAV"
+        },
+        {
+            "art": "earth",
+            "name": "NUM"
+        },
+        {
+            "art": "bluetooth",
+            "name": "BT"
+        }
+    ]
+}
