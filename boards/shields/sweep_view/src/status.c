@@ -5,6 +5,7 @@
  *   │  art   │  68×68 emblem for the active layer, drawing itself
  *   ├────────┤
  *   │  NAV   │  layer name
+ *   │ _■___  │  which layer, counting from the base layer
  *   │ ▭ 84%  │  battery
  *   │ ᛒ 2    │  USB, or the Bluetooth profile and whether it's connected
  *   ├────────┤
@@ -134,17 +135,26 @@ static void draw_info(void) {
     } else {
         snprintf(name, sizeof(name), "LAYER %d", state.layer);
     }
-    draw_text(c, 0, 3, CANVAS_SIZE, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER, name);
-    draw_rect(c, 6, 26, CANVAS_SIZE - 12, 1, FOREGROUND);
+    draw_text(c, 0, 2, CANVAS_SIZE, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER, name);
+
+    /* A tick per layer, the current one filled in (up to eight fit). */
+    if (state.layer < sweep_view_layer_count && sweep_view_layer_count * 9 - 5 <= CANVAS_SIZE) {
+        const int left = (CANVAS_SIZE - (sweep_view_layer_count * 9 - 5)) / 2;
+        for (int i = 0; i < sweep_view_layer_count; i++) {
+            const bool current = i == state.layer;
+            draw_rect(c, left + i * 9, current ? 20 : 23, 4, current ? 4 : 1, FOREGROUND);
+        }
+    }
+    draw_rect(c, 6, 28, CANVAS_SIZE - 12, 1, FOREGROUND);
 
     /* Battery: an outline filled to the charge, with the percentage. */
-    draw_rect(c, 4, 34, 24, 12, FOREGROUND);
-    draw_rect(c, 5, 35, 22, 10, BACKGROUND);
-    draw_rect(c, 6, 36, (state.battery * 20 + 50) / 100, 8, FOREGROUND);
-    draw_rect(c, 28, 37, 2, 6, FOREGROUND);
+    draw_rect(c, 4, 35, 24, 12, FOREGROUND);
+    draw_rect(c, 5, 36, 22, 10, BACKGROUND);
+    draw_rect(c, 6, 37, (state.battery * 20 + 50) / 100, 8, FOREGROUND);
+    draw_rect(c, 28, 38, 2, 6, FOREGROUND);
     char battery[8];
     snprintf(battery, sizeof(battery), "%s%d%%", state.charging ? "+" : "", state.battery);
-    draw_text(c, 32, 33, CANVAS_SIZE - 32, &lv_font_montserrat_12, LV_TEXT_ALIGN_LEFT, battery);
+    draw_text(c, 32, 34, CANVAS_SIZE - 32, &lv_font_montserrat_12, LV_TEXT_ALIGN_LEFT, battery);
 
     char output[16] = {};
     if (state.endpoint.transport == ZMK_TRANSPORT_USB) {
@@ -155,7 +165,7 @@ static void draw_info(void) {
                                                      : LV_SYMBOL_CLOSE;
         snprintf(output, sizeof(output), "%s %d", mark, state.profile + 1);
     }
-    draw_text(c, 4, 50, CANVAS_SIZE - 4, &lv_font_montserrat_12, LV_TEXT_ALIGN_LEFT, output);
+    draw_text(c, 4, 51, CANVAS_SIZE - 4, &lv_font_montserrat_12, LV_TEXT_ALIGN_LEFT, output);
 
     rotate(c);
 }
